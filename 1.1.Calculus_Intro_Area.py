@@ -116,14 +116,69 @@ class CommonAreasEnglishScene(Scene):
             t2c={"irregular shapes": YELLOW} 
         ).move_to(ORIGIN + UP * 1) # Move slightly up
         
+
+        self.play(Write(final_text_part1))
+        self.wait(1)
+        self.play(FadeOut(final_text_part1))
+        
         final_text_part2 = Text(
             "Like the area under a curve?",
             font_size=38,
-           t2c={"area under a curve": GREEN} 
-        ).move_to(ORIGIN + DOWN * 1) # Move slightly down
+            t2c={"area under a curve": GREEN}
+            ).move_to(ORIGIN)
+        self.play(FadeIn(final_text_part2, shift=UP))
+        
+        # --- 4. Show three different curves with shaded area ---
+        def make_axes():
+            return Axes(
+                x_range=[0, 6, 1],
+                y_range=[0, 8, 1],
+                axis_config={"include_tip": True},
+                x_length=4,
+                y_length=3
+            )
 
-        self.play(Write(final_text_part1))
-        self.wait(2)
-        self.play(Write(final_text_part2))
+        # 3 axes
+        axes1 = make_axes()
+        axes2 = make_axes()
+        axes3 = make_axes()
+
+        # functions
+        graph1 = axes1.plot(lambda x: -0.4*(x-3)**2 + 6, color=BLUE)
+        graph2 = axes2.plot(lambda x: -0.1*(x-3)**3 + 0.6*(x-3) + 5, color=GREEN)
+        graph3 = axes3.plot(lambda x: -0.02*(x-3)**4 + 0.25*(x-3)**2 + 6, color=YELLOW)
+
+        # areas
+        area1 = axes1.get_area(graph1, x_range=[1.5, 4.5], color=BLUE, opacity=0.6)
+        area2 = axes2.get_area(graph2, x_range=[1, 5], color=GREEN, opacity=0.6)
+        area3 = axes3.get_area(graph3, x_range=[1, 5], color=YELLOW, opacity=0.6)
+
+        # chịu
+        top_row = Group(
+            VGroup(axes1, graph1, area1),
+            VGroup(axes2, graph2, area2)
+        ).arrange(RIGHT, buff=1.2)
+
+        bottom_row = VGroup(axes3, graph3, area3)
+
+        layout = Group(top_row, bottom_row).arrange(DOWN, buff=1.2)
+
+        # animations
+        self.play(Create(axes1), Create(axes2), Create(axes3))
+        self.wait(0.5)
+
+        self.play(Create(graph1), Create(graph2), Create(graph3))
+        self.wait(0.5)
+
+        self.play(FadeIn(area1), FadeIn(area2), FadeIn(area3))
         self.wait(3)
-        self.play(FadeOut(final_text_part1), FadeOut(final_text_part2))
+        
+        #end scene
+        everything = VGroup(
+            axes1, axes2, axes3,
+            graph1, graph2, graph3,
+            area1, area2, area3,
+            final_text_part2
+            )
+        self.play(FadeOut(everything))
+        self.wait(1)
