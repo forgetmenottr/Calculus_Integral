@@ -8,8 +8,8 @@ This project is a final assignment for a **Calculus** course. It utilizes the **
 
 The animation focuses on illustrating the following core concepts:
 1.  The concept of **Riemann Sums** and how rectangles approximate the area under the curve.
-2.  The **Limit Process** as the number of rectangles ($n \to \infty$) and the width of each rectangle ($\Delta x \to 0$), transitioning from the Riemann sum to the Integral.
-3.  The relationship between the Definite Integral and the **area under the function's curve**.
+2.  Definition of difinite and indifinite integral
+3.  Applications in real-life
 
 ## 🚀 Getting Started
 
