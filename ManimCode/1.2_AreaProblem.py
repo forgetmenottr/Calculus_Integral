@@ -235,3 +235,10 @@ class RiemannSumIntroScene(Scene):
             current_rects = new_rects
             
         self.wait(1)
+        
+            # clean
+        self.play(
+            FadeOut(data_row_mobjects),FadeOut(table_lines), FadeOut(header_n), FadeOut(header_Rn),
+            FadeOut(current_rects), FadeOut(new_rects)
+        )
+        self.wait(1)
