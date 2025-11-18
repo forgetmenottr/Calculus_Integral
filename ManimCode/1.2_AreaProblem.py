@@ -50,11 +50,6 @@ class RiemannSumIntroScene(Scene):
             graph_group.animate.to_edge(LEFT, buff=1).shift(DOWN * 0.02)
         )
         self.wait(1)
-        
-        # --- 3. RIGHT ENDPOINT APPROXIMATION (n=4) ---
-        # Title is at the top edge
-        title_approx = Text("Approximating with Rectangles", font_size=36).to_edge(UP)
-        self.play(Write(title_approx))
 
         # FIX: Use string "right" for input_sample_type
         rects_right = axes.get_riemann_rectangles(
@@ -137,6 +132,106 @@ class RiemannSumIntroScene(Scene):
 
         # Clean up
         self.play(
-            FadeOut(rects_left), FadeOut(result_text_l), 
+            FadeOut(rects_left), FadeOut(result_text_l), FadeOut(calc_text_l),
             FadeOut(over_text_l), FadeOut(desc_left), FadeOut(arrow_l)
         )
+        
+        # --- 6. SCENE 5: HOW TO GET A BETTER APPROXIMATE ---
+
+        # New title
+        title_better_approx = Text("How to get a better approximate?", font_size=36).to_edge(UP)
+
+        # Re-show the graph group and the new title
+        # The graph_group is still at its last position (to_edge(LEFT, ...))
+        self.play(
+            ReplacementTransform(title_approx, title_better_approx),
+        )
+        self.wait(1)
+        
+        # Data (raw strings)
+        table_data_strings = [
+            ("10", "0.3850000"),
+            ("20", "0.3587500"),
+            ("30", "0.3501852"),
+            ("50", "0.3434000"),
+            ("100", "0.3383500"),
+            ("1000", "0.3338335"),
+        ]
+        
+        # --- NEW HYBRID LOGIC ---
+
+        # 1. Create the DATA table (using regular Table)
+        data_table = Table(
+            table_data_strings,
+            include_outer_lines=True,
+            h_buff=0.4,
+            v_buff=0.2,
+            line_config={"stroke_width": 1},
+            # This config applies to the strings in table_data_strings
+            element_to_mobject_config={"font": "Consolas", "font_size": 24}
+        )
+        
+        # Position the data table (make space for header)
+        data_table.next_to(graph_group, RIGHT, buff=0.5).shift(DOWN * 1.0)
+        
+        # 2. Create MathTex headers SEPARATELY
+        header_n = MathTex("n", font_size=28, stroke_width=1, color=WHITE)
+        header_Rn = MathTex("R_n", font_size=28, stroke_width=1, color=WHITE)
+        
+        # 3. Manually position headers above the columns
+        # Get the top center of the first and second columns
+        col_1_top = data_table.get_columns()[0].get_top()
+        col_2_top = data_table.get_columns()[1].get_top()
+        
+        # Place headers right above their columns
+        header_n.next_to(col_1_top, UP, buff=0.25)
+        header_Rn.next_to(col_2_top, UP, buff=0.25)
+
+        # --- Animation Sequence ---
+        
+        # 3.1. Create grid lines first (This works now!)
+        # 3.1. Create grid lines first (FIXED)
+        table_lines = VGroup(
+            *data_table.get_horizontal_lines(),
+            *data_table.get_vertical_lines()
+        )
+        self.play(Create(table_lines))
+
+        # 3.2. Write headers
+        self.play(Write(header_n), Write(header_Rn))
+        self.wait(0.5)
+
+        # 3.3. Get data entries (These are now inside data_table)
+        data_row_mobjects = data_table.get_rows()
+
+        # --- Loop Animation ---
+        
+        # 3.4. Show first row (n=10) and initial rects
+        n_initial = int(table_data_strings[0][0])
+        current_rects = axes.get_riemann_rectangles(
+                graph, x_range=[0, 1], dx=1.0/n_initial, input_sample_type="right",
+                color=ORANGE, fill_opacity=0.6, stroke_width=2.0
+        )
+        # Animate the rects and the first data row
+        self.play(Create(current_rects), Write(data_row_mobjects[0]))
+        self.wait(1)
+
+        # 3.5. Loop through the rest of the data
+        for i in range(1, len(table_data_strings)):
+            n_val = int(table_data_strings[i][0])
+            new_rects = axes.get_riemann_rectangles(
+                graph, x_range=[0, 1], dx=1.0/n_val, input_sample_type="right",
+                color=ORANGE, fill_opacity=0.6 + (i*0.05),
+                stroke_width=max(1.5 * (0.7**i), 0.05) 
+            )
+            
+            # Play transform of rects and write new row simultaneously
+            self.play(
+                ReplacementTransform(current_rects, new_rects),
+                Write(data_row_mobjects[i]), # Write the next data row
+                run_time=0.8 
+            )
+            self.wait(0.5)
+            current_rects = new_rects
+            
+        self.wait(1)
