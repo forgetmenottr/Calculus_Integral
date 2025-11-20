@@ -38,57 +38,86 @@ class RiemannSumIntroScene(Scene):
         # Xuất hiện 4 hình chữ nhật màu đỏ right-endpoint nằm trong đồ thị
         rects_R4_initial = axes.get_riemann_rectangles(
             graph, x_range=[0, 1], dx=0.25, 
-            input_sample_type="right", color=RED, fill_opacity=0.6 # Màu đỏ như bạn mô tả
+            input_sample_type="right", color=RED, fill_opacity=0.6 
         )
         self.play(Create(rects_R4_initial))
         self.wait(1)
         
         
-        # 4 hình chữ nhật di chuyển ra ngoài, có dấu cộng nằm giữa mỗi hình, 
-        # f(x) bên trong mỗi hình và phía dưới ghi dx giống hình 1
         
-        # Tạo bản sao của các hình chữ nhật để di chuyển ra ngoài
-        moved_rects = VGroup(*[rect.copy().set_color(RED).set_fill(color=RED, opacity=1.0) for rect in rects_R4_initial])
+# --- NEW SCENE ---
 
-        # Tạo các nhãn f(x) và dx cho mỗi hình chữ nhật
-        area_terms = VGroup()
-        for i, rect in enumerate(moved_rects):
-            f_x_label = MathTex("f(x)", font_size=28, color=WHITE).move_to(rect)
-            dx_label = MathTex("dx", font_size=24, color=WHITE).next_to(rect, DOWN, buff=0.1)
-            area_terms.add(VGroup(rect, f_x_label, dx_label))
+        # 1. Prepare object
+        # Grouping and locating
+        equation_group = VGroup()
+        
+        # List of rectangles
+        # and text (dùng cho FadeIn/Write)
+        moved_rects = VGroup()
+        labels_and_signs = VGroup()
 
-        # Thêm các dấu cộng giữa các hình chữ nhật
+        # Grouping (Hình + f(x) + dx)
+        for rect in rects_R4_initial:
+            # Copying
+            new_rect = rect.copy().set_color(RED).set_fill(color=RED, opacity=1.0)
+            
+            # f(x) between rectangles
+            f_x_label = MathTex("f(x)", font_size=24, color=WHITE).move_to(new_rect.get_center())
+            
+            # dx below
+            dx_label = MathTex("dx", font_size=24, color=WHITE).next_to(new_rect, DOWN, buff=0.1)
+            
+            # grouping
+            term_group = VGroup(new_rect, f_x_label, dx_label)
+            
+            # Thêm vào danh sách quản lý
+            equation_group.add(term_group)
+            moved_rects.add(new_rect)
+            labels_and_signs.add(f_x_label, dx_label)
+
+        # adding +
         plus_signs = VGroup()
-        for i in range(len(area_terms) - 1):
-            plus = MathTex("+", font_size=40).next_to(area_terms[i], RIGHT, buff=0.2)
-            plus_signs.add(plus)
         
-        # Nhóm tất cả lại để sắp xếp
-        full_sum_mobject = VGroup(area_terms[0])
-        for i in range(len(plus_signs)):
-            full_sum_mobject.add(plus_signs[i], area_terms[i+1])
+        # kbic
+        full_sum_mobject = VGroup()
         
+        for i in range(len(equation_group)):
+            full_sum_mobject.add(equation_group[i])
+            if i < len(equation_group) - 1:
+                plus = MathTex("+", font_size=40)
+                plus_signs.add(plus)
+                labels_and_signs.add(plus)
+                full_sum_mobject.add(plus)
+
+        # Rearrange
         full_sum_mobject.arrange(RIGHT, buff=0.2).center()
         
-        # Thêm "Area =" vào phía trước
+        # Make text
         area_text = MathTex("Area =", font_size=40).next_to(full_sum_mobject, LEFT, buff=0.5)
+
+        # --- (ANIMATION) ---
         
-        # Nhóm các hình chữ nhật và di chuyển chúng ra giữa màn hình
+        # Biến đổi hình chữ nhật từ đồ thị ra giữa màn hình
         self.play(
-            FadeOut(graph_group), # Ẩn đồ thị và trục tọa độ
-            ReplacementTransform(rects_R4_initial, moved_rects.arrange(RIGHT, buff=0.5).move_to(ORIGIN)),
-            Write(area_text)
+            FadeOut(graph_group),
+            ReplacementTransform(rects_R4_initial, moved_rects), 
+            Write(area_text),
+            run_time=1.5
         )
+        
         self.wait(0.5)
+
+        # Hiện các nhãn f(x), dx và dấu cộng
         self.play(
-            FadeIn(full_sum_mobject) # Hiện tất cả các thành phần
+            Write(labels_and_signs),
+            run_time=1
         )
+        
         self.wait(1)
 
-
-        # 4 hình chữ nhật này biến thành công thức sigma như hình 2
+        # 4 hình chữ nhật này biến thành công thức sigma
         formula_sigma_img2 = MathTex(
-            r"Area = \sum_{i=1}^{4} f(x_i) \cdot dx", # Đã điều chỉnh n thành i
+            r"Area = \sum_{i=1}^{4} f(x_i) \cdot dx",
             font_size=50
         )
         # Di chuyển công thức sigma sang bên phải
@@ -99,21 +128,83 @@ class RiemannSumIntroScene(Scene):
             graph, x_range=[0, 1], dx=0.25, 
             input_sample_type="right", color=RED, fill_opacity=0.6
         )
-
-        # Dùng ReplacementTransform để chuyển đổi từ biểu thức tổng sang sigma
-        # Đồng thời, cho xuất hiện lại (FadeIn) đồ thị và các hình chữ nhật
+        
+        # ựa
         self.play(
             ReplacementTransform(VGroup(area_text, full_sum_mobject), formula_sigma_img2),
             FadeIn(graph_group),
             Create(final_rects)
         )
-        self.wait(3)
+        self.wait(0.5)
 
-        # Final cleanup
-        self.play(
-            FadeOut(formula_sigma_img2),
-            FadeOut(title_better_approx),
-            FadeOut(graph_group),      # Thêm FadeOut cho đồ thị
-            FadeOut(final_rects)       # Thêm FadeOut cho các hình chữ nhật
+# --- RIEMANN SUM ---
+        COMMON_FONT_SIZE = 50
+
+        # 1st formula n=4
+        current_formula = MathTex(
+            r"Area = \sum_{i=1}^{4} f(x_i) \cdot dx", 
+            font_size=COMMON_FONT_SIZE
         )
-        self.wait(1)
+        
+        # Position 1st formula
+        current_formula.next_to(graph_group, RIGHT, buff=0.5)
+        
+        # kbic
+        if 'formula_sigma_img2' in locals():
+            self.remove(formula_sigma_img2)
+            current_formula.move_to(formula_sigma_img2, aligned_edge=LEFT)
+        
+        self.add(current_formula)
+
+        # --- BẮT ĐẦU VÒNG LẶP TĂNG N ---
+
+        n_values = [8, 16, 32, 64]
+        current_rects = final_rects
+        
+        for n in n_values:
+            # cthuc tăng theo hcn
+            new_rects = axes.get_riemann_rectangles(
+                graph, x_range=[0, 1], dx=1.0/n, 
+                input_sample_type="right", color=RED, fill_opacity=0.6
+            )
+            new_formula = MathTex(
+                r"Area = \sum_{i=1}^{" + str(n) + r"} f(x_i) \cdot dx",
+                font_size=COMMON_FONT_SIZE
+            )
+            
+            new_formula.move_to(current_formula, aligned_edge=LEFT)
+
+            # Animation
+            self.play(
+                ReplacementTransform(current_rects, new_rects),
+                ReplacementTransform(current_formula, new_formula),
+                run_time=1.0
+            )
+
+            # Update variable
+            current_rects = new_rects
+            current_formula = new_formula
+            
+            self.wait(0.5)
+
+        # --- LAST DANCE ---
+
+        # OVERALL
+        final_generic_formula = MathTex(
+            r"\sum_{i=1}^{n} f(x_i) \cdot dx",
+            font_size=50
+        ).center()
+        
+        title_RiemannSum= Text("Riemann Sum", font_size=36).to_edge(UP)
+        
+        # Animation
+        self.play(
+            ReplacementTransform(title_better_approx,title_RiemannSum),
+            ReplacementTransform(current_formula, final_generic_formula),
+            FadeOut(graph_group),
+            FadeOut(axes),
+            FadeOut(current_rects),
+            run_time=2.0
+        )
+
+        self.wait(2)
