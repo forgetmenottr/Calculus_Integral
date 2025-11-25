@@ -94,7 +94,9 @@ class RiemannSumIntroScene(Scene):
         
         # Make text
         area_text = MathTex("Area =", font_size=40).next_to(full_sum_mobject, LEFT, buff=0.5)
-
+        dx_note = MathTex(r"dx = \frac{b-a}{n}", font_size=36)
+        dx_note.next_to(area_text, DOWN, buff=0.8, aligned_edge=LEFT)
+        
         # --- (ANIMATION) ---
         
         # Biến đổi hình chữ nhật từ đồ thị ra giữa màn hình
@@ -114,6 +116,11 @@ class RiemannSumIntroScene(Scene):
         )
         
         self.wait(1)
+        
+        self.play(
+            Write(dx_note)
+        )
+        self.wait(2)
 
         # 4 hình chữ nhật này biến thành công thức sigma
         formula_sigma_img2 = MathTex(
@@ -131,6 +138,7 @@ class RiemannSumIntroScene(Scene):
         
         # ựa
         self.play(
+            FadeOut(dx_note),
             ReplacementTransform(VGroup(area_text, full_sum_mobject), formula_sigma_img2),
             FadeIn(graph_group),
             Create(final_rects)
