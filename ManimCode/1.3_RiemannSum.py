@@ -65,7 +65,7 @@ class RiemannSumIntroScene(Scene):
             f_x_label = MathTex("f(x)", font_size=24, color=WHITE).move_to(new_rect.get_center())
             
             # dx below
-            dx_label = MathTex("dx", font_size=24, color=WHITE).next_to(new_rect, DOWN, buff=0.1)
+            dx_label = MathTex("\Delta x", font_size=24, color=WHITE).next_to(new_rect, DOWN, buff=0.1)
             
             # grouping
             term_group = VGroup(new_rect, f_x_label, dx_label)
@@ -94,7 +94,7 @@ class RiemannSumIntroScene(Scene):
         
         # Make text
         area_text = MathTex("Area =", font_size=40).next_to(full_sum_mobject, LEFT, buff=0.5)
-        dx_note = MathTex(r"dx = \frac{b-a}{n}", font_size=36)
+        dx_note = MathTex(r"\Delta x = \frac{b-a}{n}", font_size=36)
         dx_note.next_to(area_text, DOWN, buff=0.8, aligned_edge=LEFT)
         
         # --- (ANIMATION) ---
@@ -124,7 +124,7 @@ class RiemannSumIntroScene(Scene):
 
         # 4 hình chữ nhật này biến thành công thức sigma
         formula_sigma_img2 = MathTex(
-            r"Area = \sum_{i=1}^{4} f(x_i) \cdot dx",
+            r"Area = \sum_{i=1}^{4} f(x_i) \cdot \Delta x",
             font_size=50
         )
         # Di chuyển công thức sigma sang bên phải
@@ -150,7 +150,7 @@ class RiemannSumIntroScene(Scene):
 
         # 1st formula n=4
         current_formula = MathTex(
-            r"Area = \sum_{i=1}^{4} f(x_i) \cdot dx", 
+            r"Area = \sum_{i=1}^{4} f(x_i) \cdot \Delta x", 
             font_size=COMMON_FONT_SIZE
         )
         
@@ -176,7 +176,7 @@ class RiemannSumIntroScene(Scene):
                 input_sample_type="right", color=RED, fill_opacity=0.6
             )
             new_formula = MathTex(
-                r"Area = \sum_{i=1}^{" + str(n) + r"} f(x_i) \cdot dx",
+                r"Area = \sum_{i=1}^{" + str(n) + r"} f(x_i) \cdot \Delta x",
                 font_size=COMMON_FONT_SIZE
             )
             
@@ -199,7 +199,7 @@ class RiemannSumIntroScene(Scene):
 
         # OVERALL
         final_generic_formula = MathTex(
-            r"\sum_{i=1}^{n} f(x_i) \cdot dx",
+            r"\sum_{i=1}^{n} f(x_i) \cdot \Delta x",
             font_size=50
         ).center()
         
